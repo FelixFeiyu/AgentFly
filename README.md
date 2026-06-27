@@ -22,7 +22,21 @@ The repository includes the research runtime, deterministic evaluation suite, De
 - 45 automated Python tests plus 5 browser-player tests.
 - DeepSeek JSON-mode planner with local CMG validation.
 
-This MVP does **not** yet include VLM adapters, RAG indexing, ROS 2, PX4/Gazebo, cloud-edge deployment, a web UI, or real-flight results. The Pure-LLM and ReAct benchmark entries remain deterministic behavioral baselines; the DeepSeek adapter is currently used for mission graph generation, not the checked-in benchmark table.
+## Research Positioning and Contributions
+
+AgentFly targets **task-level agentic planning for long-horizon UAV operations**, rather than proposing a new low-level trajectory optimizer. It connects language-conditioned planning with deterministic execution boundaries that are usually studied separately in embodied agents and UAV planning.
+
+Relative to skill-selection methods such as [SayCan](https://arxiv.org/abs/2204.01691), closed-loop agents such as [Inner Monologue](https://arxiv.org/abs/2207.05608) and [ReAct](https://arxiv.org/abs/2210.03629), executable-plan methods such as [ProgPrompt](https://arxiv.org/abs/2209.11302) and [LLM+P](https://arxiv.org/abs/2304.11477), and UAV-oriented systems such as [UAV-CodeAgents](https://arxiv.org/abs/2505.07236), the current research contributions are:
+
+- **Constraint-aware Mission Graph (CMG):** represents dependencies, risk, failure routes, required nodes, typed tool arguments, return behavior, and battery reserve in one executable graph;
+- **Validator-guided semantic repair:** converts missing language constraints into deterministic diagnostics and asks the model to repair only the incomplete grounding;
+- **Local graph recovery:** preserves completed work and replaces only the failed action or route segment instead of regenerating and replaying the full mission;
+- **Generative/deterministic separation:** the model proposes high-level plans, while graph validation, typed tools, Safety Gate checks, and flight-controller failsafes retain execution authority;
+- **Task-level tool orchestration:** combines mapping, waypoint planning, inspection, evidence capture, monitoring, return, and reporting rather than evaluating navigation alone.
+
+The strongest current paper direction is **CMG + validator-guided semantic repair + local graph recovery**. VLM perception, production RAG, measured cloud-edge scheduling, ROS 2/PX4/Gazebo integration, human-in-the-loop studies, multi-UAV coordination, and real-flight validation remain future work. The repository does not claim SOTA performance.
+
+This MVP does **not** yet include VLM adapters, RAG indexing, ROS 2, PX4/Gazebo, cloud-edge deployment, or real-flight results. The browser UI is a deterministic showcase rather than a live flight console. The Pure-LLM and ReAct benchmark entries remain deterministic behavioral baselines; the DeepSeek adapter is currently used for mission graph generation, not the checked-in benchmark table.
 
 ## Quick Start
 
