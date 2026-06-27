@@ -1,0 +1,101 @@
+{
+  "mission": {
+    "id": "AG-017",
+    "scenario": "农业区域巡检",
+    "instruction": "巡检 A 区域农田并标记疑似病虫害区域；低置信结果需要补拍，任务结束后安全返航并生成报告。",
+    "location": "A 区试验田",
+    "model": "AgentFly CMG Planner"
+  },
+  "duration": 90,
+  "chapters": [
+    {"id": "understand", "time": 0, "label": "任务理解"},
+    {"id": "execute", "time": 18, "label": "飞行巡检"},
+    {"id": "inspect", "time": 38, "label": "视觉复核"},
+    {"id": "recover", "time": 50, "label": "异常恢复"},
+    {"id": "report", "time": 76, "label": "返航与报告"}
+  ],
+  "map": {
+    "bounds": {"width": 1000, "height": 620},
+    "regions": [
+      {"id": "field-a", "label": "A 区试验田", "x": 120, "y": 92, "width": 700, "height": 420},
+      {"id": "disease-1", "label": "疑似病害区", "x": 535, "y": 280, "radius": 42}
+    ],
+    "waypoints": [
+      {"id": "HOME", "x": 105, "y": 535},
+      {"id": "WP-01", "x": 190, "y": 430},
+      {"id": "WP-02", "x": 315, "y": 190},
+      {"id": "WP-03", "x": 525, "y": 320},
+      {"id": "WP-04", "x": 710, "y": 170},
+      {"id": "WP-04B", "x": 760, "y": 355},
+      {"id": "WP-05", "x": 590, "y": 465},
+      {"id": "WP-06", "x": 330, "y": 430}
+    ],
+    "original_route": ["HOME", "WP-01", "WP-02", "WP-03", "WP-04", "WP-05", "WP-06", "HOME"],
+    "repaired_route": ["WP-03", "WP-04B", "WP-05", "WP-06", "HOME"]
+  },
+  "graph": {
+    "nodes": [
+      {"id": "parse", "label": "解析任务区域", "kind": "reason", "status": "pending"},
+      {"id": "retrieve", "label": "检索作业规则", "kind": "rag", "status": "pending"},
+      {"id": "route", "label": "生成覆盖航线", "kind": "plan", "status": "pending"},
+      {"id": "inspect", "label": "执行航点巡检", "kind": "move", "status": "pending"},
+      {"id": "detect", "label": "识别疑似病害", "kind": "vision", "status": "pending"},
+      {"id": "evidence", "label": "补拍证据图像", "kind": "capture", "status": "pending"},
+      {"id": "return", "label": "安全返航", "kind": "return", "status": "pending"},
+      {"id": "report", "label": "生成巡检报告", "kind": "report", "status": "pending"}
+    ],
+    "edges": [
+      ["parse", "retrieve"], ["retrieve", "route"], ["route", "inspect"],
+      ["inspect", "detect"], ["detect", "evidence"], ["evidence", "return"],
+      ["return", "report"]
+    ]
+  },
+  "events": [
+    {"time": 0, "type": "mission", "title": "接收自然语言任务", "detail": "识别区域、巡检目标、补拍条件和安全返航要求。", "payload": {"status": "planning"}},
+    {"time": 2, "type": "graph", "title": "解析任务区域", "detail": "地图工具返回 A 区边界与起降点。", "payload": {"nodeId": "parse", "status": "running"}},
+    {"time": 6, "type": "graph", "title": "区域解析完成", "detail": "已建立地理围栏和作业范围。", "payload": {"nodeId": "parse", "status": "completed"}},
+    {"time": 7, "type": "graph", "title": "检索安全与行业规则", "detail": "查询最低返航电量、作业高度和证据采集规范。", "payload": {"nodeId": "retrieve", "status": "running"}},
+    {"time": 10, "type": "tool", "title": "RAG · safety_policy.search", "detail": "命中 3 条规则：返航储备 ≥ 25%，高度 35–55 m，低置信检测需补拍。", "payload": {"tool": "knowledge.search", "result": "3 rules", "calls": 1}},
+    {"time": 12, "type": "graph", "title": "作业约束已注入", "detail": "规则转化为任务图前置条件和 Safety Gate 检查。", "payload": {"nodeId": "retrieve", "status": "completed"}},
+    {"time": 13, "type": "graph", "title": "生成覆盖航线", "detail": "Planner 生成 6 个巡检航点和故障分支。", "payload": {"nodeId": "route", "status": "running"}},
+    {"time": 16, "type": "tool", "title": "Tool · waypoint.plan", "detail": "航线 1.84 km，预计返航电量 38%，通过约束验证。", "payload": {"tool": "waypoint.plan", "result": "valid", "calls": 2}},
+    {"time": 18, "type": "graph", "title": "任务图验证通过", "detail": "依赖、故障路由和电量储备均有效，开始执行。", "payload": {"nodeId": "route", "status": "completed"}},
+    {"time": 19, "type": "graph", "title": "起飞并执行巡检", "detail": "Executor 接管已验证任务图。", "payload": {"nodeId": "inspect", "status": "running"}},
+    {"time": 20, "type": "position", "title": "前往 WP-01", "detail": "保持 42 m 作业高度。", "payload": {"from": "HOME", "to": "WP-01", "progress": 0.1}},
+    {"time": 24, "type": "telemetry", "title": "飞行状态正常", "detail": "通信和定位稳定。", "payload": {"battery": 91, "altitude": 42, "signal": 96, "completed": 3, "calls": 3}},
+    {"time": 28, "type": "position", "title": "完成 WP-01", "detail": "进入 WP-02 农作物扫描航段。", "payload": {"from": "WP-01", "to": "WP-02", "progress": 0.45}},
+    {"time": 34, "type": "tool", "title": "Tool · vision.inspect", "detail": "多光谱检测正常，继续前往 WP-03。", "payload": {"tool": "vision.inspect", "result": "normal", "calls": 5}},
+    {"time": 38, "type": "position", "title": "抵达 WP-03", "detail": "对高风险地块执行精细扫描。", "payload": {"from": "WP-02", "to": "WP-03", "progress": 0.72}},
+    {"time": 40, "type": "graph", "title": "运行视觉异常检测", "detail": "VLM 分析冠层纹理和颜色异常。", "payload": {"nodeId": "detect", "status": "running"}},
+    {"time": 42, "type": "detection", "title": "发现疑似病害区域", "detail": "初始置信度 0.62，低于作业阈值 0.75。", "payload": {"regionId": "disease-1", "confidence": 0.62, "visible": true}},
+    {"time": 44, "type": "graph", "title": "视觉检测完成", "detail": "Reasoner 判断证据不足，触发补拍分支。", "payload": {"nodeId": "detect", "status": "completed"}},
+    {"time": 45, "type": "graph", "title": "执行低空补拍", "detail": "降低至 36 m，改变视角并连续采集两帧。", "payload": {"nodeId": "evidence", "status": "running"}},
+    {"time": 47, "type": "tool", "title": "Tool · vision.capture", "detail": "补拍后置信度提升至 0.87，证据已入任务记忆。", "payload": {"tool": "vision.capture", "result": "confidence 0.87", "calls": 8}},
+    {"time": 49, "type": "graph", "title": "证据采集完成", "detail": "异常区域已标记，继续原计划。", "payload": {"nodeId": "evidence", "status": "completed"}},
+    {"time": 50, "type": "position", "title": "转向 WP-04", "detail": "局部风场开始增强。", "payload": {"from": "WP-03", "to": "WP-04", "progress": 0.28}},
+    {"time": 52, "type": "fault", "title": "航点 WP-04 不可达", "detail": "临时禁飞区与原航段相交，Safety Gate 拒绝继续。", "payload": {"code": "waypoint_unreachable", "waypoint": "WP-04", "status": "recovering"}},
+    {"time": 54, "type": "telemetry", "title": "进入安全悬停", "detail": "保留已完成节点并评估剩余电量。", "payload": {"battery": 68, "altitude": 42, "signal": 91, "completed": 5, "calls": 9}},
+    {"time": 56, "type": "tool", "title": "Tool · map.find_alternate", "detail": "找到替代航点 WP-04B，新增距离 36 m。", "payload": {"tool": "map.find_alternate", "result": "WP-04B", "calls": 10}},
+    {"time": 58, "type": "recovery", "title": "局部任务图修复成功", "detail": "仅替换失效航段，不重复已完成的巡检与补拍任务。", "payload": {"route": ["WP-03", "WP-04B", "WP-05", "WP-06", "HOME"], "attempts": 1, "successes": 1, "status": "executing"}},
+    {"time": 60, "type": "position", "title": "执行修复航线", "detail": "无人机绕开禁飞区域前往 WP-04B。", "payload": {"from": "WP-03", "to": "WP-04B", "progress": 0.48}},
+    {"time": 66, "type": "tool", "title": "Tool · vision.inspect", "detail": "WP-04B 与 WP-05 巡检完成，未发现新异常。", "payload": {"tool": "vision.inspect", "result": "normal", "calls": 12}},
+    {"time": 70, "type": "position", "title": "完成最后巡检航段", "detail": "剩余电量满足返航储备要求。", "payload": {"from": "WP-05", "to": "WP-06", "progress": 0.86}},
+    {"time": 74, "type": "graph", "title": "区域巡检完成", "detail": "6 个航点全部覆盖，进入返航阶段。", "payload": {"nodeId": "inspect", "status": "completed"}},
+    {"time": 76, "type": "graph", "title": "执行安全返航", "detail": "Safety Gate 再次检查返航路径与电量储备。", "payload": {"nodeId": "return", "status": "running"}},
+    {"time": 78, "type": "position", "title": "返回 HOME", "detail": "沿已验证航段返回起降点。", "payload": {"from": "WP-06", "to": "HOME", "progress": 0.94}},
+    {"time": 82, "type": "graph", "title": "安全着陆", "detail": "最终电量 34%，高于 25% 储备阈值。", "payload": {"nodeId": "return", "status": "completed"}},
+    {"time": 83, "type": "telemetry", "title": "飞行执行结束", "detail": "任务约束违规数为 0。", "payload": {"battery": 34, "altitude": 0, "signal": 98, "completed": 7, "calls": 13}},
+    {"time": 84, "type": "graph", "title": "生成结构化报告", "detail": "汇总航线、异常证据、工具日志和恢复记录。", "payload": {"nodeId": "report", "status": "running"}},
+    {"time": 88, "type": "tool", "title": "Tool · report.generate", "detail": "巡检报告与异常坐标清单已生成。", "payload": {"tool": "report.generate", "result": "ready", "calls": 14}},
+    {"time": 90, "type": "report", "title": "任务成功完成", "detail": "发现 1 处疑似病害区域，完成 1 次局部重规划并安全返航。", "payload": {"status": "succeeded", "completed": 8, "battery": 34, "calls": 14, "distance": 1.88, "violations": 0}}
+  ],
+  "report": {
+    "status": "任务成功",
+    "summary": "完成 A 区 6 个航点巡检，标记 1 处疑似病害区域，并在 WP-04 不可达后完成局部重规划。",
+    "findings": [
+      {"label": "疑似病害区域", "value": "1 处", "detail": "WP-03 · 置信度 0.87"},
+      {"label": "异常恢复", "value": "1 / 1", "detail": "局部航段替换成功"},
+      {"label": "安全约束", "value": "0 次违规", "detail": "着陆电量 34%"}
+    ]
+  }
+}

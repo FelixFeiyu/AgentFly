@@ -1,0 +1,28 @@
+{
+  "mock_benchmark_note": "确定性 MockEnv 系统实验：120 tasks × 3 seeds × 5 methods，共 1,800 次方法运行。结果用于验证软件协议与恢复行为，不代表 PX4/Gazebo 或真实飞行 SOTA。",
+  "mock_benchmark": [
+    {"method": "AgentFly", "task_success_rate": 0.9138888888888889, "plan_validity": 1.0, "tool_use_accuracy": 0.8527777777777777, "recovery_success_rate": 0.9090909090909091, "route_efficiency": 0.9138888888888889, "execution_cost": 4.451944444444445},
+    {"method": "Rule", "task_success_rate": 0.7583333333333333, "plan_validity": 1.0, "tool_use_accuracy": 0.8061111111111111, "recovery_success_rate": 0.4462809917355372, "route_efficiency": 0.7583333333333333, "execution_cost": 3.9386111111111113},
+    {"method": "PDDL-style", "task_success_rate": 0.6083333333333333, "plan_validity": 1.0, "tool_use_accuracy": 0.7611111111111111, "recovery_success_rate": 0.0, "route_efficiency": 0.6083333333333333, "execution_cost": 3.443611111111111},
+    {"method": "Pure-LLM-style", "task_success_rate": 0.5138888888888888, "plan_validity": 0.825, "tool_use_accuracy": 0.7727272727272727, "recovery_success_rate": 0.0, "route_efficiency": 0.5138888888888888, "execution_cost": 3.4851851851851854},
+    {"method": "ReAct-style", "task_success_rate": 0.6083333333333333, "plan_validity": 1.0, "tool_use_accuracy": 0.7101851851851851, "recovery_success_rate": 0.0, "route_efficiency": 0.6083333333333333, "execution_cost": 3.7797222222222224}
+  ],
+  "deepseek": {
+    "note": "真实 DeepSeek API 的任务图生成实验；Plan Validity 表示结构可执行性，不表示真实飞行成功率。",
+    "model": "deepseek-v4-flash",
+    "tasks": 50,
+    "first_pass_plan_validity": 1.0,
+    "average_latency_s": 4.26479462,
+    "total_tokens": 48437,
+    "api_response_retries": 0
+  },
+  "semantic_repair": {
+    "note": "规则评估器是确定性研究代理标注，不是行业专家标签。",
+    "tasks": 50,
+    "constraints": 175,
+    "direct_constraint_coverage": 0.7142857142857143,
+    "repaired_constraint_coverage": 0.8857142857142857,
+    "direct_fully_grounded_task_rate": 0.24,
+    "repaired_fully_grounded_task_rate": 0.7
+  }
+}

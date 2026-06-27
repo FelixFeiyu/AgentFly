@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AgentFly agentic UAV mission planning showcase">
+  <title>AgentFly · Agentic UAV Mission Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="loading" class="loading-screen">
+    <div class="loading-mark" aria-hidden="true"></div>
+    <p>正在载入任务剧本</p>
+  </div>
+
+  <main id="app" class="app" hidden>
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand">AGENTFLY</div>
+        <div class="brand-sub">AGENTIC UAV MISSION SYSTEM</div>
+      </div>
+      <nav class="view-tabs" aria-label="Demo 视图">
+        <button class="tab active" data-view="mission" aria-pressed="true">任务回放</button>
+        <button class="tab" data-view="research" aria-pressed="false">研究结果</button>
+      </nav>
+      <div class="mission-meta">
+        <span id="mission-state" class="status-pill"><i></i> READY</span>
+        <span id="clock">00:00 / 01:30</span>
+      </div>
+    </header>
+
+    <section id="mission-view" class="view mission-view">
+      <div class="mission-brief">
+        <div>
+          <span class="eyebrow" id="mission-id">MISSION AG-017</span>
+          <h1 id="scenario-title">农业区域巡检</h1>
+        </div>
+        <p id="instruction">加载任务指令...</p>
+      </div>
+
+      <div class="workspace">
+        <aside class="panel graph-panel">
+          <div class="panel-heading">
+            <span>MISSION GRAPH</span>
+            <span id="graph-progress">0 / 8</span>
+          </div>
+          <ol id="graph-nodes" class="graph-nodes" aria-label="任务图"></ol>
+        </aside>
+
+        <section class="panel map-panel" aria-label="无人机任务地图">
+          <div class="panel-heading map-heading">
+            <span>LIVE MISSION MAP</span>
+            <span id="map-caption">ALT 0 M · A 区试验田</span>
+          </div>
+          <svg id="mission-map" viewBox="0 0 1000 620" role="img" aria-labelledby="map-title map-desc">
+            <title id="map-title">AgentFly 农业巡检地图</title>
+            <desc id="map-desc">展示原始航线、无人机位置、病害区域和修复航线。</desc>
+            <defs>
+              <pattern id="field-grid" width="50" height="38" patternUnits="userSpaceOnUse">
+                <path d="M 0 38 L 50 0" class="field-line"></path>
+              </pattern>
+              <filter id="drone-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
+                <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+              </filter>
+            </defs>
+            <rect x="0" y="0" width="1000" height="620" class="map-bg"></rect>
+            <rect x="120" y="92" width="700" height="420" class="field-area"></rect>
+            <rect x="120" y="92" width="700" height="420" fill="url(#field-grid)" opacity="0.65"></rect>
+            <text x="140" y="122" class="map-label">A 区试验田 · GEOFENCE ACTIVE</text>
+            <g id="route-layer"></g>
+            <g id="waypoint-layer"></g>
+            <g id="detection-layer"></g>
+            <g id="drone" transform="translate(105 535)" filter="url(#drone-glow)">
+              <circle r="18" class="drone-ring"></circle>
+              <path d="M-14 0H14M0-14V14M-11-11L11 11M11-11L-11 11" class="drone-body"></path>
+              <circle r="4" class="drone-core"></circle>
+            </g>
+          </svg>
+          <div id="map-alert" class="map-alert" hidden></div>
+          <div class="map-legend" aria-label="地图图例">
+            <span><i class="legend-dot original"></i>原航线</span>
+            <span><i class="legend-dot repaired"></i>修复航线</span>
+            <span><i class="legend-dot anomaly"></i>视觉异常</span>
+          </div>
+        </section>
+
+        <aside class="panel trace-panel">
+          <div class="panel-heading">
+            <span>AGENT ACTION TRACE</span>
+            <span>PUBLIC LOG</span>
+          </div>
+          <div id="trace" class="trace" aria-live="polite"></div>
+        </aside>
+      </div>
+
+      <section class="control-deck">
+        <div id="chapter-nav" class="chapters" aria-label="剧情章节"></div>
+        <div class="timeline-wrap">
+          <input id="timeline" type="range" min="0" max="90" step="0.1" value="0" aria-label="任务播放进度">
+        </div>
+        <div class="control-row">
+          <div class="transport">
+            <button id="play-toggle" class="icon-button primary" title="播放" aria-label="播放">▶</button>
+            <button id="restart" class="icon-button" title="重新播放" aria-label="重新播放">↺</button>
+            <button id="speed" class="speed-button" title="切换播放速度" aria-label="播放速度">1×</button>
+          </div>
+          <dl class="telemetry">
+            <div><dt>BATTERY</dt><dd id="battery">100%</dd></div>
+            <div><dt>ALTITUDE</dt><dd id="altitude">0 m</dd></div>
+            <div><dt>TASK</dt><dd id="task-count">0 / 8</dd></div>
+            <div><dt>TOOLS</dt><dd id="tool-count">0</dd></div>
+            <div><dt>RECOVERY</dt><dd id="recovery-count">0 / 0</dd></div>
+          </dl>
+        </div>
+      </section>
+    </section>
+
+    <section id="research-view" class="view research-view" hidden>
+      <header class="research-header">
+        <span class="eyebrow">REPRODUCIBLE EVALUATION</span>
+        <h1>从任务执行到研究证据</h1>
+        <p>展示数据来自仓库内固定实验产物。模拟实验、真实模型规划和语义约束修复分别报告。</p>
+      </header>
+      <div class="research-grid">
+        <section class="result-block benchmark-block">
+          <div class="result-heading"><h2>MockEnv 方法对比</h2><span>1,800 RUNS</span></div>
+          <p id="benchmark-note" class="result-note"></p>
+          <div id="benchmark-chart" class="benchmark-chart"></div>
+        </section>
+        <section class="result-block">
+          <div class="result-heading"><h2>DeepSeek 任务图生成</h2><span>50 TASKS</span></div>
+          <div id="deepseek-metrics" class="metric-grid"></div>
+          <p id="deepseek-note" class="result-note"></p>
+        </section>
+        <section class="result-block">
+          <div class="result-heading"><h2>语义约束修复</h2><span>175 CONSTRAINTS</span></div>
+          <div id="repair-chart" class="repair-chart"></div>
+          <p id="repair-note" class="result-note"></p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <section id="error-panel" class="error-panel" hidden role="alert">
+    <span>DEMO LOAD ERROR</span>
+    <h1>无法载入任务数据</h1>
+    <p id="error-message"></p>
+    <button id="retry">重试</button>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
