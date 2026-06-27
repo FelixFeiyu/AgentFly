@@ -1,5 +1,7 @@
 # AgentFly
 
+**[Launch the interactive AgentFly Demo](https://felixfeiyu.github.io/AgentFly/)**
+
 AgentFly is a research MVP for constraint-aware agentic task planning and tool use in UAV missions. It turns a mission into a validated mission graph, executes typed tools through a safety gate, and applies local graph-level recovery when an action fails.
 
 The repository includes the research runtime, deterministic evaluation suite, DeepSeek planner adapter, and an interactive browser showcase.
@@ -15,7 +17,7 @@ The repository includes the research runtime, deterministic evaluation suite, De
 - deterministic agriculture, powerline, security, and mapping task generation;
 - 12 metrics from the research design;
 - CSV/JSON/Markdown experiment outputs;
-- 40 automated tests.
+- 45 automated Python tests plus 5 browser-player tests.
 - DeepSeek JSON-mode planner with local CMG validation.
 
 This MVP does **not** yet include VLM adapters, RAG indexing, ROS 2, PX4/Gazebo, cloud-edge deployment, a web UI, or real-flight results. The Pure-LLM and ReAct benchmark entries remain deterministic behavioral baselines; the DeepSeek adapter is currently used for mission graph generation, not the checked-in benchmark table.
@@ -35,6 +37,8 @@ python3 -m agentfly.cli run \
 ## Showcase Demo
 
 The browser Demo plays a deterministic 90-second agriculture inspection mission with a synchronized task graph, UAV route, public Agent action trace, low-confidence recapture, local route recovery, and research-results view. It runs without an API key.
+
+**Online:** [https://felixfeiyu.github.io/AgentFly/](https://felixfeiyu.github.io/AgentFly/)
 
 ```bash
 python3 -m http.server 8000 --directory demos
