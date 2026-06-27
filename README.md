@@ -1,5 +1,7 @@
 # AgentFly
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 **[Launch the interactive AgentFly Demo](https://felixfeiyu.github.io/AgentFly/)**
 
 AgentFly is a research MVP for constraint-aware agentic task planning and tool use in UAV missions. It turns a mission into a validated mission graph, executes typed tools through a safety gate, and applies local graph-level recovery when an action fails.

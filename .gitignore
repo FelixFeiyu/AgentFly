@@ -13,3 +13,4 @@ outputs/
 # Publish only the root project README as Markdown
 *.md
 !/README.md
+!/README.zh-CN.md
