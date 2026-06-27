@@ -9,6 +9,11 @@ __pycache__/
 # Local research artifacts and API response caches
 outputs/
 .superpowers/
+logs/
+
+# Local source-of-truth and owner learning documents
+PROJECT_SPEC.md
+PROJECT_REPORT.md
 
 # Publish only the root project README as Markdown
 *.md
